@@ -8,15 +8,17 @@
 #USAGE:
 #docker build -t plant_test -f Dockerfile .
 #docker run -v /path to test image:/images -it plant_test
-#cd /opt/smart/
-#python3 /opt/smart/core/trait_extract_parallel_demo.py -p /images/ -ft jpg -min 20000 -md 35
+#cd /opt/AI_U2net_color_clustering/
+#python3 /opt/AI_U2net_color_clustering/core/python3 ai_color_cluster_seg.py -p ~/example/ -ft png
+
+
 
 
 FROM ubuntu:22.04
 
 LABEL maintainer='Suxing Liu, Wes Bonelli'
 
-COPY ./ /opt/smart
+COPY ./ /opt/AI_U2net_color_clustering
 
 
 RUN apt-get update && apt-get upgrade -y
@@ -58,9 +60,9 @@ RUN pip3 install numpy \
 
 
 
-RUN chmod -R a+rwx /opt/smart/
+RUN chmod -R a+rwx /opt/AI_U2net_color_clustering/
 
-WORKDIR /opt/smart/
+WORKDIR /opt/AI_U2net_color_clustering/
 
 
 
