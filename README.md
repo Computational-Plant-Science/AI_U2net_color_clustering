@@ -1,6 +1,6 @@
 # AI_U2net_color_clustering (SMART branch)
 
-A machine learning model U2net and OpenCV based color clustering method hat performs object segmentation in a single shot
+A machine learning model U2net and OpenCV-based color clustering method that performs object segmentation in a single shot
 
 Plant phenotyping using computer vision.
 
