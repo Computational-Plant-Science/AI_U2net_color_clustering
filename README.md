@@ -28,14 +28,19 @@ Robust and parameter-free plant image segmentation.
     Segmentation mask and masked foreground image
 
 
-## Sample workflow
+## Sample Test
 
 ![Sample Input](../main/media/IMG_6241.png)
 
+Sample input image: two roots interaction in meshed box, Designed by Will LaVoy @ wlavoy@arizona.edu
+
 ![Sample Output: mask](../main/media/IMG_6241_mask.png)
+
+Smaple output: mask image
 
 ![Sample Output: mask](../main/media/IMG_6241_masked.png)
 
+Smaple output: masked foreground image with roots object only
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -177,7 +182,6 @@ The SMART pipeline has also been applied in collaboration with following researc
 ## Imaging protocol for SMART
 
 
-![Optional Text](../main/media/plant.jpg)
 
 Setting up plants
 
@@ -189,7 +193,7 @@ Setting up plants
 
 
 
-![Optional Text](../main/media/camera.jpg)
+
 
 Setting up camera
 
