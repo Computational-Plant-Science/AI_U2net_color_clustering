@@ -1,6 +1,6 @@
 # AI_U2net_color_clustering (SMART branch)
 
-A machine learning model U2net and opencv based color clsutering method hat performs object segmentation in a single shot
+A machine learning model U2net and OpenCV-based color clustering method that performs object segmentation in a single shot
 
 Plant phenotyping using computer vision.
 
@@ -21,7 +21,7 @@ Robust and parameter-free plant image segmentation.
 
 ## Inputs 
 
-   Image file, individual plant tray image from top view, captured by ANY modern digital camera. 
+   An image file, individual plant tray image from the top view, captured by ANY modern digital camera. 
 
 ## Results 
 
@@ -32,17 +32,17 @@ Robust and parameter-free plant image segmentation.
 
 ![Sample Input](../main/media/IMG_6241.png)
 
-Sample input image: two roots interaction in meshed box, Designed by [William Alexander Lavoy](https://www.linkedin.com/in/william-lavoy-547775188/) @ wlavoy@arizona.edu, 
+Sample input image: two roots interaction in a meshed box, Designed by [William Alexander Lavoy](https://www.linkedin.com/in/william-lavoy-547775188/) @ wlavoy@arizona.edu, 
 
 
 
 ![Sample Output: mask](../main/media/IMG_6241_mask.png)
 
-Smaple output: mask image
+Sample output: mask image
 
 ![Sample Output: mask](../main/media/IMG_6241_masked.png)
 
-Smaple output: masked foreground image with roots object only
+Sample output: masked foreground image with roots object only
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -163,7 +163,7 @@ The SMART pipeline has been integrated into CyVerse cloud computing-based websit
 CyVerse users can upload data and run the SMART pipeline for free. 
 
 
-The SMART pipeline has also been applied in collaboration with following research institutes and companies: 
+The SMART pipeline has also been applied in collaboration with the following research institutes and companies: 
 
 1. Dr. David G. Mendoza-Cozatl at [University of Missouri](https://cafnr.missouri.edu/person/david-mendoza-cozatl/)
 
