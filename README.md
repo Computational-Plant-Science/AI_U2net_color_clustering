@@ -32,7 +32,9 @@ Robust and parameter-free plant image segmentation.
 
 ![Sample Input](../main/media/IMG_6241.png)
 
-Sample input image: two roots interaction in meshed box, Designed by Will LaVoy @ wlavoy@arizona.edu
+Sample input image: two roots interaction in meshed box, Designed by [William Alexander Lavoy](https://www.linkedin.com/in/william-lavoy-547775188/) @ wlavoy@arizona.edu, 
+
+
 
 ![Sample Output: mask](../main/media/IMG_6241_mask.png)
 
