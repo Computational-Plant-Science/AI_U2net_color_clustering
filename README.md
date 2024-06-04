@@ -10,7 +10,7 @@ Author: Suxing Liu
 ##
 
 
-![Optional Text](../master/media/Smart.png) 
+![Optional Text](../main/media/Smart.png) 
 
 Robust and parameter-free plant image segmentation.
 
@@ -30,11 +30,11 @@ Robust and parameter-free plant image segmentation.
 
 ## Sample workflow
 
-![Sample Input](../master/media/IMG_6241.png)
+![Sample Input](../main/media/IMG_6241.png)
 
-![Sample Output: mask](../master/media/IMG_6241_mask.png)
+![Sample Output: mask](../main/media/IMG_6241_mask.png)
 
-![Sample Output: mask](../master/media/IMG_6241_masked.png)
+![Sample Output: mask](../main/media/IMG_6241_masked.png)
 
 
 
@@ -177,7 +177,7 @@ The SMART pipeline has also been applied in collaboration with following researc
 ## Imaging protocol for SMART
 
 
-![Optional Text](../master/media/plant.jpg)
+![Optional Text](../main/media/plant.jpg)
 
 Setting up plants
 
@@ -189,7 +189,7 @@ Setting up plants
 
 
 
-![Optional Text](../master/media/camera.jpg)
+![Optional Text](../main/media/camera.jpg)
 
 Setting up camera
 
