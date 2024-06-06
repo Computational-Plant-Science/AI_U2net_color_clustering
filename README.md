@@ -98,7 +98,7 @@ Note: pl can be set to 1 to use parallel processing mode locally using host PC m
    /$host_path/AI_U2net_color_clustering/sample_test/
 ```
 
-2. Main pipeline to compute the segmentation results:
+3. Main pipeline to compute the segmentation results:
 
 ```bash
 
