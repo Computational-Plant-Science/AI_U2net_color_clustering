@@ -1,11 +1,11 @@
 '''
-Name: trait_extract_parallel.py
+Name: ai_color_cluster_seg.py
 
 Version: 1.0
 
-Summary: A machine learning model U2net and opencv based color clsutering method hat performs object segmentation in a single shot
+Summary: A machine learning model U2net and opencv based color clustering method hat performs object segmentation in a single shot
     
-Author: suxing liu
+Author: Suxing Liu
 
 Author-email: suxingliu@gmail.com
 
@@ -16,87 +16,64 @@ USAGE:
     python3 ai_color_cluster_seg.py -p ~/example/ -ft png
 
 PARAMETERS:
-    ("-i", "--input", dest="input", required=True, type=str, help="full path to 3D model file")
-    ("-o", "--output_path", dest = "output_path", type = str, required = False, help = "result path")
-    ("-n", "--n_plane", dest = "n_plane", type = int, required = False, default = 5,  help = "Number of planes to segment the 3d model along Z direction")
-    ("-sr", "--slicing_ratio", dest = "slicing_ratio", type = float, required = False, default = 0.10, help = "ratio of slicing the model from the bottom")
-
+    ("-p", "--path", dest = "path", type = str, required = True,    help = "path to image file")
+    ("-ft", "--filetype", dest = "filetype", type = str, required = False, default='jpg,png', help = "Image filetype")
+    ("-o", "--output_path", dest = "output_path", type = str, required = False,    help = "result path")
+    ('-s', '--color_space', dest = "color_space", type = str, required = False, default ='lab', help='Color space to use: BGR, HSV, Lab, YCrCb (YCC)')
+    ('-c', '--channels', dest = "channels", type = str, required = False, default='2', help='Channel indices to use for clustering, where 0 is the first channel,'
+                                                                       + ' 1 is the second channel, etc. E.g., if BGR color space is used, "02" '
+                                                                       + 'selects channels B and R. (default "all")')
+    ('-n', '--num_clusters', dest = "num_clusters", type = int, required = False, default = 4,  help = 'Number of clusters for K-means clustering (default 2, min 2).')
+    ('-min', '--min_size', dest = "min_size", type = int, required = False, default = 500,  help = 'min size of object to be segmented.')
+    ('-max', '--max_size', dest = "max_size", type = int, required = False, default = 1000000,  help = 'max size of object to be segmented.')
 
 INPUT:
-    
     Image file
 
 OUTPUT:
-
     Segmentation mask and masked foreground image
+
+
 '''
+
+
+
+
 # import the necessary packages
 import os
 import glob
-import utils
 import pathlib
+from pathlib import Path
 
 from collections import Counter
 from collections import OrderedDict
 
-import argparse
-
 from sklearn.cluster import KMeans
-from sklearn.cluster import MiniBatchKMeans
 
-from skimage.feature import peak_local_max
 from skimage.morphology import medial_axis
 from skimage import img_as_float, img_as_ubyte, img_as_bool, img_as_int
-from skimage import measure
-from skimage.color import rgb2lab, deltaE_cie76
 from skimage import morphology
 from skimage.segmentation import clear_border, watershed
-from skimage.measure import regionprops
 
 from scipy.spatial import distance as dist
-from scipy import optimize
-from scipy import ndimage
-from scipy.interpolate import interp1d
-
-#from skan import skeleton_to_csgraph, Skeleton, summarize, draw
-
-#import networkx as nx
-
-import imutils
+import PIL
+from PIL import Image
 
 import numpy as np
 import argparse
 import cv2
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-
-import math
-import openpyxl
-import csv
-    
-from tabulate import tabulate
-
 import warnings
 warnings.filterwarnings("ignore")
-
-
-
-from pathlib import Path
-
 from rembg import remove
-
-from matplotlib import collections
-
-import matplotlib.colors
 
 
 
 
 MBFACTOR = float(1<<20)
 
-
-
+'''
 # color label class
 class ColorLabeler:
     def __init__(self):
@@ -185,12 +162,12 @@ class ColorLabeler:
             # return the name of the color with the smallest distance
             return self.colorNames[minDist[1]]
 
+'''
 
-# generate foloder to store the output results
+
+
+# generate folder to store the output results
 def mkdir(path):
-    # import module
-    import os
- 
     # remove space at the beginning
     path=path.strip()
     # remove slash at the end
@@ -271,11 +248,10 @@ def agglomerative_cluster(contours, threshold_distance=40.0):
 # segment foreground object using color clustering method
 def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
     
+
+    #image_LAB = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     
-    
-    image_LAB = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-    
-    cl = ColorLabeler()
+    #cl = ColorLabeler()
     
     # Change image color space, if necessary.
     colorSpace = args_colorspace.lower()
@@ -340,19 +316,7 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
     
     ret, thresh = cv2.threshold(kmeansImage,0,255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     
-    '''
-    if args['out_boundary']:
-        thresh_cleaned = (thresh)
-    
-    else:
-        
-        if np.count_nonzero(thresh) > 0:
-            
-            thresh_cleaned = clear_border(thresh)
-        else:
-            thresh_cleaned = thresh
-    '''
-    
+
     if np.count_nonzero(thresh) > 0:
         
         thresh_cleaned = clear_border(thresh)
@@ -385,10 +349,7 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
     
     
     ################################################################################################
-    
-
     if args['max_size'] == 1000000:
-        
         max_size = width*height
     else:
         max_size = args['max_size']
@@ -409,8 +370,8 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
         
         # ensure the width, height, and area are all neither too small
         # nor too big
-        keepWidth = w > 0 and w < 50000
-        keepHeight = h > 0 and h < 50000
+        keepWidth = w > 0 and w < 6000
+        keepHeight = h > 0 and h < 4000
         keepArea = area > min_size and area < max_size
         
         #if all((keepWidth, keepHeight, keepArea)):
@@ -445,13 +406,11 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
         
         img_thresh = closing
         
-        
 
-    
     return img_thresh
 
     
-
+'''
 # compute medial axis from the mask of image
 def medial_axis_image(thresh):
     
@@ -485,7 +444,7 @@ def skeleton_bw(thresh):
 
     return skeleton_img, skeleton
 
-
+'''
 
 # compute percentage as two decimals value
 def percentage(part, whole):
@@ -497,6 +456,7 @@ def percentage(part, whole):
   return str(percentage)
 
 
+'''
 # convert image from RGB to LAB color space
 def image_BRG2LAB(image_file):
 
@@ -560,7 +520,7 @@ def image_BRG2LAB(image_file):
     
     plt.savefig(result_file, bbox_inches = 'tight', dpi = 1000)
     
-
+'''
 
 
 # compute the size and shape info of the foreground
@@ -742,16 +702,15 @@ def get_cmap(n, name = 'hsv'):
     
 
 
-# cluster colors in the maksed image
+# cluster colors in the masked image
 def color_region(image, mask, save_path, num_clusters):
     
     # read the image
-     #grab image width and height
+    # get image width and height
     (h, w) = image.shape[:2]
 
     #apply the mask to get the segmentation of plant
     masked_image_ori = cv2.bitwise_and(image, image, mask = mask)
-    
     
     # convert to RGB
     image_RGB = cv2.cvtColor(masked_image_ori, cv2.COLOR_BGR2RGB)
@@ -780,7 +739,6 @@ def color_region(image, mask, save_path, num_clusters):
     # reshape back to the original image dimension
     segmented_image = segmented_image.reshape(image_RGB.shape)
 
-
     segmented_image_BRG = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
     
     if args["debug"] == 1:
@@ -807,9 +765,7 @@ def color_region(image, mask, save_path, num_clusters):
     # color (i.e cluster) to render
     #cluster = 2
 
-    cmap = get_cmap(num_clusters + 1)
-    
-
+    #cmap = get_cmap(num_clusters + 1)
 
     ####################################################################
     counts = Counter(labels_flat)
@@ -897,7 +853,7 @@ def RGB2LAB(image, mask):
     return masked_rgb, L, A, B
     
 
-
+'''
 # Max RGB filter 
 def max_rgb_filter(image):
     
@@ -915,7 +871,7 @@ def max_rgb_filter(image):
     
     # merge the channels back together and return the image
     return cv2.merge([B, G, R])
-
+'''
 
 # compute all the traits
 def u2net_color_cluster(image_file):
@@ -923,7 +879,13 @@ def u2net_color_cluster(image_file):
 
     ################################################################################
     # load image data
-    image = cv2.imread(image_file)
+    pil_img = Image.open(image_file)
+
+    cv2_img_arr = np.array(pil_img)
+    image = cv2.cvtColor(cv2_img_arr, cv2.COLOR_RGB2BGR)
+
+
+    #image = cv2.imread(image_file)
     
     # make backup image
     orig = image.copy()
@@ -984,16 +946,12 @@ def u2net_color_cluster(image_file):
 
     '''
     (masked_rgb, L, A, B) = RGB2LAB(ROI_region.copy(), thresh)
-    
-    
-    
+
     print("L_max = {} L_min = {}\n".format(L.max(), L.min()))
-    
     print("A_max = {} A_min = {}\n".format(A.max(), A.min()))
-    
     print("B_max = {} B_min = {}\n".format(B.max(), B.min()))
     
-
+    
     
     result_img_path = save_path + 'masked_rgb.png'
     cv2.imwrite(result_img_path, masked_rgb)
@@ -1012,8 +970,6 @@ def u2net_color_cluster(image_file):
     # apply object mask
     masked_rgb = cv2.bitwise_and(ROI_region, ROI_region, mask = thresh)
 
-
-    
     ##########################################################################################################
     # color clustering using pre-defined color cluster value by user
     
@@ -1112,6 +1068,21 @@ if __name__ == '__main__':
     # print out result path
     print("results_folder: {}\n".format(result_path))
 
+    #########################################################################
+    # scan the folder to remove the 0 size image
+    for image_id, image_file in enumerate(imgList):
+        try:
+            image = Image.open(image_file)
+        except PIL.UnidentifiedImageError as e:
+            print(f"Error in file {image_file}: {e}")
+            os.remove(image_file)
+            print(f"Removed file {image_file}")
+
+    ############################################################################
+    #accquire image file list after remove error images
+    imgList = sorted(glob.glob(image_file_path))
+
+
     ########################################################################
     # parameters
     min_size = args['min_size']
@@ -1130,11 +1101,14 @@ if __name__ == '__main__':
 
         print("Segment foreground object for image file {} ...\n".format(file_path, filename, basename))
 
+        # main pipeline to perform the segmentation based on u2net and color clustering
         (thresh, masked_rgb) = u2net_color_cluster(image_file)
-        
-        write_file(thresh, result_path, basename, '_mask.', ext)
-        
-        write_file(masked_rgb, result_path, basename, '_masked.', ext)
+
+        # save mask result image as png format
+        write_file(thresh, result_path, basename, '_mask.', 'png')
+
+        # save masked result image as png format
+        write_file(masked_rgb, result_path, basename, '_masked.', 'png')
         
         
         

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 /opt/smart/core/trait_extract_parallel_demo.py -p $INPUT
+python3 /opt/code/ai_color_cluster_seg.py -p $INPUT

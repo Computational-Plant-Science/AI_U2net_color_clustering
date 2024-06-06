@@ -92,19 +92,19 @@ Example input can be downloaded from the "/sample_test/" folder, which contains 
    /$host_path/AI_U2net_color_clustering/sample_test/
 ```
 
-2. extract traits:
+2. Main pipeline to compute the segmentation results:
 
 ```bash
 
-   cd /$host_path/SMART/
+   cd /$host_path/AI_U2net_color_clustering/
 
    
-   python3 /opt/AI_U2net_color_clustering/core/ai_color_cluster_seg.py -p /$host_path/AI_U2net_color_clustering/sample_test/ -ft png -o /$host_path/AI_U2net_color_clustering/sample_test/
+   python3 /$host_path/AI_U2net_color_clustering/ai_color_cluster_seg.py -p /$host_path/AI_U2net_color_clustering/sample_test/ -ft CR2 -o /$host_path/AI_U2net_color_clustering/sample_test/
 
 ```
 Results will be generated in the output folder by adding "/$host_path/AI_U2net_color_clustering/sample_test/"
 
-The default input image type png, can be changed by adding a parameter such as " -ft png".
+The default input image type png, can be changed by adding a parameter such as " -ft CR2".
 
 
 
@@ -128,27 +128,45 @@ Reference: https://docs.docker.com/storage/bind-mounts/
 
 For example, to run the sample test inside this repo, under the folder "sample_test", first locate the local path 
 ```
-    docker run -v /$path_to_AI_U2net_color_clustering_repo/AI_U2net_color_clustering/sample_test:/images -it computationalplantscience/AI_U2net_color_clustering
+    docker run -v /$path_to_test_image:/images -it computationalplantscience/AI_U2net_color_clustering
 ```
 
     then run the mounted input images inside the container:
 ``` 
-    python3 /opt/smart/core/ai_color_cluster_seg.py -p /images/ -ft png 
+    python3 /opt/code/ai_color_cluster_seg.py -p /images/ -ft CR2 
 ```
     or 
 ```
-    docker run -v /$path_to_AI_U2net_color_clustering_repo/AI_U2net_color_clustering/sample_test:/images -it computationalplantscience/AI_U2net_color_clustering  python3 /opt/AI_U2net_color_clustering/core/ai_color_cluster_seg.py -p /images/ -ft png
+    docker run -v /$path_to_test_images:/images -it computationalplantscience/AI_U2net_color_clustering  python3 /opt/code/ai_color_cluster_seg.py -p /images/ -ft CR2 
 ```
 
 2. Build your local container
 
 ```bash
 
-    docker build -t smart_container -f Dockerfile .
+    docker build -t test_container -f Dockerfile .
 
-    docker run -v  /home/suxing/AI_U2net_color_clustering/sample_test:/images -it smart_container
+    docker run -v  /$path_to_test_images:/images -it test_container
 
 ```
+
+3. Addition function to change the image format from 
+
+```bash
+
+    docker build -t test_container -f Dockerfile .
+
+    docker run -v  /$path_to_test_images:/images -it test_container 
+    
+    python3 image_converter.py -p /images/ -ft CR2  -o /images/
+    
+    note: "-o /images/" was output path, user can create a new folder such as "/$path_to_test_images/png/" then change output path to "-o /images/png/"
+        
+    or docker run -v  /$path_to_test_images:/images -it computationalplantscience/AI_U2net_color_clustering python3 image_converter.py -p /images/ -ft CR2  -o /images/
+
+``` 
+
+
 
 Results will be generated in the same input folder.
 
