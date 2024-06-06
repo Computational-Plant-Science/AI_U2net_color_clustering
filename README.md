@@ -71,23 +71,12 @@ Main pipeline:
 
     User defined parameters: python3 ai_color_cluster_seg.py -p /$path_to_test_image_folder/ -ft png -o /$path_to_result_folder/ -s lab -c 2 -min 500 -max 1000000 -pl 0
 
-PARAMETERS:
-    ("-p", "--path", dest = "path", type = str, required = True,    help = "path to image file")
-    ("-ft", "--filetype", dest = "filetype", type = str, required = False, default='jpg,png', help = "Image filetype")
-    ("-o", "--output_path", dest = "output_path", type = str, required = False,    help = "result path")
-    ('-s', '--color_space', dest = "color_space", type = str, required = False, default ='lab', help='Color space to use: BGR, HSV, Lab, YCrCb (YCC)')
-    ('-c', '--channels', dest = "channels", type = str, required = False, default='2', help='Channel indices to use for clustering, where 0 is the first channel,'
-                                                                       + ' 1 is the second channel, etc. E.g., if BGR color space is used, "02" '
-                                                                       + 'selects channels B and R. (default "all")')
-    ('-min', '--min_size', dest = "min_size", type = int, required = False, default = 500,  help = 'min size of object to be segmented.')
-    ('-max', '--max_size', dest = "max_size", type = int, required = False, default = 1000000,  help = 'max size of object to be segmented.')
-    ('-pl', '--parallel', dest = "parallel", type = int, required = False, default = 0,  help = 'Whether using parallel processing or loop processing, 0: Loop, 1: Parallel')
 
 Note: pl can be set to 1 to use parallel processing mode locally using host PC mutiple cores and threads, will consume more memory. 
 
 
 
-1. Download the repo into the local host PC:
+1. Clone the repo into the local host PC:
 
 ```bash
 
