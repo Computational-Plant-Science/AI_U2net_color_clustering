@@ -13,7 +13,9 @@ Created: 2023-06-01
 
 USAGE:
 
-    python3 ai_color_cluster_seg.py -p ~/example/ -ft png
+    Default parameters: python3 ai_color_cluster_seg.py -p ~/example/ -ft png
+
+    User defined parameters: python3 ai_color_cluster_seg.py -p ~/example/ -ft png -o ~/example/results/ -s lab -c 2 -min 500 -max 1000000 -pl 0
 
 PARAMETERS:
     ("-p", "--path", dest = "path", type = str, required = True,    help = "path to image file")
@@ -23,9 +25,9 @@ PARAMETERS:
     ('-c', '--channels', dest = "channels", type = str, required = False, default='2', help='Channel indices to use for clustering, where 0 is the first channel,'
                                                                        + ' 1 is the second channel, etc. E.g., if BGR color space is used, "02" '
                                                                        + 'selects channels B and R. (default "all")')
-    ('-n', '--num_clusters', dest = "num_clusters", type = int, required = False, default = 4,  help = 'Number of clusters for K-means clustering (default 2, min 2).')
     ('-min', '--min_size', dest = "min_size", type = int, required = False, default = 500,  help = 'min size of object to be segmented.')
     ('-max', '--max_size', dest = "max_size", type = int, required = False, default = 1000000,  help = 'max size of object to be segmented.')
+    ('-pl', '--parallel', dest = "parallel", type = int, required = False, default = 0,  help = 'Whether using parallel processing or loop processing, 0: Loop, 1: Parallel')
 
 INPUT:
     Image file
@@ -68,101 +70,9 @@ import warnings
 warnings.filterwarnings("ignore")
 from rembg import remove
 
-
-
+import time
 
 MBFACTOR = float(1<<20)
-
-'''
-# color label class
-class ColorLabeler:
-    def __init__(self):
-        # initialize the colors dictionary, containing the color
-        # name as the key and the RGB tuple as the value
-        colors = OrderedDict({
-            "dark skin": (115, 82, 68),
-            "light skin": (194, 150, 130),
-            "blue sky": (98, 122, 157),
-            "foliage": (87, 108, 67),
-            "blue flower": (133, 128, 177),
-            "bluish green": (103, 189, 170),
-            "orange": (214, 126, 44),
-            "purplish blue": (8, 91, 166),
-            "moderate red": (193, 90, 99),
-            "purple": (94, 60, 108),
-            "yellow green": (157, 188, 64),
-            "orange yellow": (224, 163, 46),
-            "blue": (56, 61, 150),
-            "green": (70, 148, 73),
-            "red": (175, 54, 60),
-            "yellow": (231, 199, 31),
-            "magneta": (187, 86, 149),
-            "cyan": (8, 133, 161),
-            "white": (243, 243, 242),
-            "neutral 8": (200, 200, 200),
-            "neutral 6.5": (160, 160, 160),
-            "neutral 5": (122, 122, 121),
-            "neutral 3.5": (85, 85, 85),
-            "black": (52, 52, 52)})
-        # allocate memory for the L*a*b* image, then initialize
-        # the color names list
-        self.lab = np.zeros((len(colors), 1, 3), dtype="uint8")
-        self.colorNames = []
-        # loop over the colors dictionary
-        for (i, (name, rgb)) in enumerate(colors.items()):
-            # update the L*a*b* array and the color names list
-            self.lab[i] = rgb
-            self.colorNames.append(name)
-        # convert the L*a*b* array from the RGB color space
-        # to L*a*b*
-        self.lab = cv2.cvtColor(self.lab, cv2.COLOR_RGB2LAB)
-        #print("color_checker values:{}\n".format(self.lab))
-
-    def label(self, image, c):
-            # construct a mask for the contour, then compute the
-            # average L*a*b* value for the masked region
-            mask = np.zeros(image.shape[:2], dtype="uint8")
-            cv2.drawContours(mask, [c], -1, 255, -1)
-            mask = cv2.erode(mask, None, iterations=2)
-            mean = cv2.mean(image, mask=mask)[:3]
-
-            # initialize the minimum distance found thus far
-            minDist = (np.inf, None)
-            # loop over the known L*a*b* color values
-            for (i, row) in enumerate(self.lab):
-                # compute the distance between the current L*a*b*
-                # color value and the mean of the image
-                d = dist.euclidean(row[0], mean)
-                
-                #print("mean = {0}, row = {1}, d = {2}, i = {3}\n".format(mean, row[0], d, i)) 
-                
-                # if the distance is smaller than the current distance,
-                # then update the bookkeeping variable
-                if d < minDist[0]:
-                    minDist = (d, i)
-            # return the name of the color with the smallest distance
-            return self.colorNames[minDist[1]], mean
-
-    def label_c(self, lab_color_value):
-            # initialize the minimum distance found thus far
-            minDist = (np.inf, None)
-           
-            # loop over the known L*a*b* color values
-            for (i, row) in enumerate(self.lab):
-                # compute the distance between the current L*a*b*
-                # color value and the mean of the image
-                d = dist.euclidean(row[0], lab_color_value)
-                
-                #print("mean = {0}, row = {1}, d = {2}, i = {3}\n".format(mean, row[0], d, i)) 
-                
-                # if the distance is smaller than the current distance,
-                # then update the bookkeeping variable
-                if d < minDist[0]:
-                    minDist = (d, i)
-            # return the name of the color with the smallest distance
-            return self.colorNames[minDist[1]]
-
-'''
 
 
 
@@ -349,12 +259,17 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
     
     
     ################################################################################################
-    if args['max_size'] == 1000000:
+    '''
+    if width*height < 1000000:
         max_size = width*height
     else:
-        max_size = args['max_size']
-    
-    # initialize an output mask 
+        max_size = args_max_size
+    '''
+
+    min_size = args_min_size
+    max_size = min(width*height, args_max_size)
+
+    # initialize an output mask
     mask = np.zeros(gray.shape, dtype="uint8")
     
     # loop over the number of unique connected component labels, skipping
@@ -901,20 +816,13 @@ def u2net_color_cluster(image_file):
     # output image file info
     if image is not None:
         
-        print("Plant object segmentation using automatic color clustering method... \n")
+        print("Plant object segmentation using u2net and color clustering method... \n")
         
         print("Image file size: {} MB, dimension: {} X {}, channels : {}\n".format(str(file_size), img_height, img_width, img_channels))
     
 
     ##################################################################################
-    # circle marker detection
-    #(diameter_circle, ROI_region, circle_detection_img) = circle_detection(orig) 
 
-    # save result
-    #result_file = (save_path + base_name + '_circle_template' + file_extension)
-    #cv2.imwrite(result_file, circle_detection_img)
-    
-    
     ROI_region = image.copy()
     
     #orig = sticker_crop_img.copy()
@@ -927,7 +835,6 @@ def u2net_color_cluster(image_file):
     roi_image = ROI_region.copy()
     
 
-    
     ###################################################################################
     # PhotoRoom Remove Background API
     
@@ -937,15 +844,12 @@ def u2net_color_cluster(image_file):
 
     ######################################################################################
     #orig = roi_image.copy()
-    
-
+    n_cluster = 2
     #color clustering based plant object segmentation, return plant object mask
-    thresh = color_cluster_seg(roi_image, args_colorspace, args_channels, 2)
+    thresh = color_cluster_seg(roi_image, args_colorspace, args_channels, n_cluster)
     
     #########################################################################################################
     # convert whole foreground object from RGB to LAB color space 
-
-
     '''
     (masked_rgb, L, A, B) = RGB2LAB(ROI_region.copy(), thresh)
 
@@ -975,20 +879,17 @@ def u2net_color_cluster(image_file):
     ##########################################################################################################
     # color clustering using pre-defined color cluster value by user
     
-    print("number of cluster: {}\n".format(args_num_clusters))
+    #print("number of cluster: {}\n".format(args_num_clusters))
     
     #color clustering of masked image
     #(rgb_colors, counts, hex_colors, color_ratio) = color_region(ROI_region, thresh, save_path, args_num_clusters)
-    
-    
+
 
     ###########################################################################################################
     #compute external contour, shape info  
     #(trait_img, area, solidity, max_width, max_height) = comp_external_contour(ROI_region, thresh)
 
 
-
-    
     return thresh, masked_rgb
         
 
@@ -1029,6 +930,21 @@ def write_file(imagearray, result_path, base_name, addition, ext):
         print("Result file writing failed!\n")
     
 
+def batch_process(image_file):
+
+    (file_path, filename, basename) = get_file_info(image_file)
+
+    print("Segment foreground object for image file {} ...\n".format(file_path, filename, basename))
+
+    # main pipeline to perform the segmentation based on u2net and color clustering
+    (thresh, masked_rgb) = u2net_color_cluster(image_file)
+
+    # save mask result image as png format
+    # write_file(thresh, result_path, basename, '_mask.', 'png')
+
+    # save masked result image as png format
+    write_file(masked_rgb, result_path, basename, '_masked.', 'png')
+
 
 
 
@@ -1042,9 +958,10 @@ if __name__ == '__main__':
     ap.add_argument('-c', '--channels', dest = "channels", type = str, required = False, default='2', help='Channel indices to use for clustering, where 0 is the first channel,' 
                                                                        + ' 1 is the second channel, etc. E.g., if BGR color space is used, "02" ' 
                                                                        + 'selects channels B and R. (default "all")')
-    ap.add_argument('-n', '--num_clusters', dest = "num_clusters", type = int, required = False, default = 4,  help = 'Number of clusters for K-means clustering (default 2, min 2).')
+    #ap.add_argument('-n', '--num_clusters', dest = "num_clusters", type = int, required = False, default = 4,  help = 'Number of clusters for K-means clustering (default 2, min 2).')
     ap.add_argument('-min', '--min_size', dest = "min_size", type = int, required = False, default = 500,  help = 'min size of object to be segmented.')
     ap.add_argument('-max', '--max_size', dest = "max_size", type = int, required = False, default = 1000000,  help = 'max size of object to be segmented.')
+    ap.add_argument('-pl', '--parallel', dest = "parallel", type = int, required = False, default = 0,  help = 'Whether using parallel processing or loop processing, 0: Loop, 1: Parallel')
     args = vars(ap.parse_args())
     
 
@@ -1087,33 +1004,67 @@ if __name__ == '__main__':
 
     ########################################################################
     # parameters
-    min_size = args['min_size']
+    args_min_size = args['min_size']
+    args_max_size = args['max_size']
 
     args_colorspace = args['color_space']
     args_channels = args['channels']
-    args_num_clusters = args['num_clusters']
-    
-    #########################################################################
-    # analysis pipeline
-    #loop execute
-    for image_id, image_file in enumerate(imgList):
-        
+    #args_num_clusters = args['num_clusters']
 
-        (file_path, filename, basename) = get_file_info(image_file)
+    args_parallel = args['parallel']
 
-        print("Segment foreground object for image file {} ...\n".format(file_path, filename, basename))
 
-        # main pipeline to perform the segmentation based on u2net and color clustering
-        (thresh, masked_rgb) = u2net_color_cluster(image_file)
 
-        # save mask result image as png format
-        #write_file(thresh, result_path, basename, '_mask.', 'png')
 
-        # save masked result image as png format
-        write_file(masked_rgb, result_path, basename, '_masked.', 'png')
-        
-        
-        
+    if args_parallel == 1:
+        # Parallel processing
+        #################################################################################
+        import psutil
+        from multiprocessing import Pool
+        from contextlib import closing
+
+        # parallel processing
+        # get cpu number for parallel processing
+        agents = psutil.cpu_count() - 2
+
+        print("Using {0} cores to perform parallel processing... \n".format(int(agents)))
+
+        # Create a pool of processes. By default, one is created for each CPU in the machine.
+        with closing(Pool(processes=agents)) as pool:
+            result = pool.map(batch_process, imgList)
+            pool.terminate()
+
+    else:
+
+        #########################################################################
+        # analysis pipeline
+        # loop execute
+
+        for image_id, image_file in enumerate(imgList):
+            # store iteration start timestamp
+            start = time.time()
+
+            (file_path, filename, basename) = get_file_info(image_file)
+
+            print("Start segmenting foreground object for image {} ...\n".format(file_path))
+
+            # main pipeline to perform the segmentation based on u2net and color clustering
+            (thresh, masked_rgb) = u2net_color_cluster(image_file)
+
+            # save mask result image as png format
+            #write_file(thresh, result_path, basename, '_mask.', 'png')
+
+            # save masked result image as png format
+            write_file(masked_rgb, result_path, basename, '_masked.', 'png')
+
+            # store iteration end timestamp
+            end = time.time()
+
+            # show time of execution per iteration
+            #print(f"Segmentation finished for: {filename}\tTime taken: {(end - start) * 10 ** 3:.03f}s !\n")
+
+            print("Segmentation finished for: {} in --- {} seconds ---\n".format(filename, (end - start)))
+
 
 
 
