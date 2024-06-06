@@ -879,13 +879,15 @@ def u2net_color_cluster(image_file):
 
     ################################################################################
     # load image data
-    pil_img = Image.open(image_file)
 
-    cv2_img_arr = np.array(pil_img)
-    image = cv2.cvtColor(cv2_img_arr, cv2.COLOR_RGB2BGR)
+    if args['filetype'] == 'CR2':
+        pil_img = Image.open(image_file)
 
+        cv2_img_arr = np.array(pil_img)
+        image = cv2.cvtColor(cv2_img_arr, cv2.COLOR_RGB2BGR)
 
-    #image = cv2.imread(image_file)
+    else:
+        image = cv2.imread(image_file)
     
     # make backup image
     orig = image.copy()
@@ -1105,7 +1107,7 @@ if __name__ == '__main__':
         (thresh, masked_rgb) = u2net_color_cluster(image_file)
 
         # save mask result image as png format
-        write_file(thresh, result_path, basename, '_mask.', 'png')
+        #write_file(thresh, result_path, basename, '_mask.', 'png')
 
         # save masked result image as png format
         write_file(masked_rgb, result_path, basename, '_masked.', 'png')
