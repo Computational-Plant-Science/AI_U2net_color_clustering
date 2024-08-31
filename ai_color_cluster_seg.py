@@ -226,13 +226,16 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
     
     ret, thresh = cv2.threshold(kmeansImage,0,255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     
-
+    '''
     if np.count_nonzero(thresh) > 0:
         
         thresh_cleaned = clear_border(thresh)
     else:
         thresh_cleaned = thresh
-
+    '''
+    
+    thresh_cleaned = thresh
+    
     (numLabels, labels, stats, centroids) = cv2.connectedComponentsWithStats(thresh_cleaned, connectivity = 8)
 
     '''
@@ -311,7 +314,7 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
 
     if len(contours) > 1:
         
-        print("mask contains mutiple non-conected parts, combine them into one\n")
+        print("mask contains mutiple non-connected parts, combine them into one\n")
         
         kernel = np.ones((size_kernel,size_kernel), np.uint8)
 
@@ -320,8 +323,16 @@ def color_cluster_seg(image, args_colorspace, args_channels, args_num_clusters):
         closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
         
         img_thresh = closing
+    
+    
+    '''
+    (height, width, n_channel) = img_thresh.shape
+    
+    if n_channel > 0:
         
-
+        # convert the mask image to gray format
+        img_thresh = cv2.cvtColor(img_thresh, cv2.COLOR_BGR2GRAY)
+    '''
     return img_thresh
 
     
@@ -826,7 +837,7 @@ def u2net_color_cluster(image_file):
     ROI_region = image.copy()
     
     #orig = sticker_crop_img.copy()
-    #result_img_path = save_path + 'ROI_region.png'
+    #result_img_path = result_path + 'ROI_region.png'
     #cv2.imwrite(result_img_path, ROI_region)
     
     ##########################################################################
@@ -839,15 +850,63 @@ def u2net_color_cluster(image_file):
     # PhotoRoom Remove Background API
     
     # AI pre-trained model to segment plant object, test function
-    roi_image = remove(roi_image).copy()
+    #roi_image = remove(roi_image).copy()
 
-
+    #result_img_path = result_path + 'roi_image.png'
+    #cv2.imwrite(result_img_path, roi_image)
+    
     ######################################################################################
     #orig = roi_image.copy()
     n_cluster = 2
+    
+    '''
     #color clustering based plant object segmentation, return plant object mask
     thresh = color_cluster_seg(roi_image, args_colorspace, args_channels, n_cluster)
     
+    masked_rgb = cv2.bitwise_and(ROI_region, ROI_region, mask = thresh)
+    
+    #masked_rgb_seg = remove(masked_rgb, bgcolor=(0, 0, 0, 255)).copy()
+    
+    thresh_seg = remove(masked_rgb, only_mask = True).copy()
+    
+    thresh_seg = cv2.threshold(thresh, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    
+    #mask_combined = thresh_seg & thresh
+    
+    #print(thresh_seg.shape)
+    
+    #print(thresh.shape)
+    '''
+    
+    thresh_seg = remove(roi_image, only_mask = True).copy()
+    
+    #thresh_seg = cv2.threshold(thresh_seg, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    
+
+    
+    
+    #result_img_path = result_path + 'masked_rgb_seg.png'
+    #cv2.imwrite(result_img_path, masked_rgb_seg)
+    
+    #result_img_path = result_path + 'thresh_seg.png'
+    #cv2.imwrite(result_img_path, thresh_seg)
+    
+    
+    #result_img_path = result_path + 'thresh.png'
+    #cv2.imwrite(result_img_path, thresh)
+    
+    ######################################################################################
+    # combine mask
+    #mask_combined = thresh_seg & thresh
+    
+    
+    #result_img_path = result_path + 'mask_combined.png'
+    #cv2.imwrite(result_img_path, mask_combined)
+    
+    
+    masked_rgb_seg = cv2.bitwise_and(roi_image, roi_image, mask = thresh_seg)
+    
+
     #########################################################################################################
     # convert whole foreground object from RGB to LAB color space 
     '''
@@ -874,7 +933,7 @@ def u2net_color_cluster(image_file):
     ##########################################################################################################
     
     # apply object mask
-    masked_rgb = cv2.bitwise_and(ROI_region, ROI_region, mask = thresh)
+    #masked_rgb = cv2.bitwise_and(ROI_region, ROI_region, mask = thresh)
 
     ##########################################################################################################
     # color clustering using pre-defined color cluster value by user
@@ -890,7 +949,9 @@ def u2net_color_cluster(image_file):
     #(trait_img, area, solidity, max_width, max_height) = comp_external_contour(ROI_region, thresh)
 
 
-    return thresh, masked_rgb
+    #return thresh, masked_rgb
+    
+    return thresh_seg, masked_rgb_seg
         
 
     
