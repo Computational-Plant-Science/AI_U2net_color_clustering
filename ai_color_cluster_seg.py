@@ -52,7 +52,7 @@ from collections import OrderedDict
 
 from sklearn.cluster import KMeans
 
-from skimage.morphology import medial_axis
+#from skimage.morphology import medial_axis
 from skimage import img_as_float, img_as_ubyte, img_as_bool, img_as_int
 from skimage import morphology
 from skimage.segmentation import clear_border, watershed
