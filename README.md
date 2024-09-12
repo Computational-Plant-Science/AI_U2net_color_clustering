@@ -1,8 +1,8 @@
-# AI_U2net_color_clustering (SMART branch)
+# SMART: Speedy Measurement of Arabidopsis Rosette Traits
 
-A machine learning model U2net and OpenCV-based color clustering method that performs object segmentation in a single shot
+Speedy Measurement of Arabidopsis Rossette Traits for time-course monitoring morphological and physiological development
 
-Plant phenotyping using computer vision.
+Plant phenotyping using computer vision: Compute geometrical traits and analyze plant surface colors
 
 Author: Suxing Liu
 
@@ -10,40 +10,25 @@ Author: Suxing Liu
 ##
 
 
+
 ![Optional Text](../main/media/Smart.png) 
 
-Robust and parameter-free plant image segmentation.
+Robust and parameter-free plant image segmentation and trait extraction.
 
 1. Process with plant image top view, including whole tray plant image, this tool will segment it into individual images.
-
-2. Robust segmentation based on parameter-free color clustering method and pre-trained machine learning model U2net.
-
-
-## Inputs 
-
-   An image file, individual plant tray image from the top view, captured by ANY modern digital camera. 
-
-## Results 
-
-    Segmentation mask and masked foreground image
+2. Robust segmentation based on parameter-free color clustering method.
+3. Extract individual plant geometrical traits, and write output into an Excel file.
 
 
-## Sample Test
+## Sample workflow
 
-![Sample Input](../main/media/IMG_6241.png)
+![Pipeline](../main/media/Slide1.png)
 
-Sample input image: two roots interaction in a meshed box, Designed by [William Alexander Lavoy](https://www.linkedin.com/in/william-lavoy-547775188/) @ wlavoy@arizona.edu, 
+![Leaf surface color analysis](../main/media/Slide2.png)
 
+![Plant color analysis using Color Checker](../main/media/Slide3.png)
 
-
-![Sample Output: mask](../main/media/IMG_6241_mask.png)
-
-Sample output: mask image
-
-![Sample Output: mask](../main/media/IMG_6241_masked.png)
-
-Sample output: masked foreground image with roots object only
-
+![Monitor plant growth](../main/media/monitor_time_growth.gif)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -53,6 +38,33 @@ Sample output: masked foreground image with roots object only
 
 
 
+
+## Inputs 
+
+   Individual plant tray image from top view, captured by ANY modern digital camera. 
+
+## Results 
+
+trait.xlsx, trait.csv
+
+Excel or csv file which contains trait computation values.
+
+## Traits summary
+
+![Pipeline](../main/media/traits_summary.png)
+
+
+## Usage in the local environment by cloning the whole GitHub repo 
+
+sample test
+
+Input: Individual plant top view images, in jpg or png format
+
+Output: Realted folders with the same name of input image files, which contain image results
+
+and trait.xlsx and trait.csv for a summary of trait computation results. 
+
+
 Input image requirement:
 
 Plant top view image captured by HD resolution RGB camera, prefer a black background with even illumination environment. 
@@ -60,33 +72,17 @@ Plant top view image captured by HD resolution RGB camera, prefer a black backgr
 Example input can be downloaded from the "/sample_test/" folder, which contains top-view images of the same Arabidopsis plant from different time points. 
 
 
-
-
-
-## Usage by cloning the  GitHub repo to local environment
-
-Main pipeline: 
-
-    Default parameters: python3 ai_color_cluster_seg.py -p /$path_to_test_image_folder/ -ft png
-
-    User defined parameters: python3 ai_color_cluster_seg.py -p /$path_to_test_image_folder/ -ft png -o /$path_to_result_folder/ -s lab -c 2 -min 500 -max 1000000 -pl 0
-
-
-Note: pl can be set to 1 to use parallel processing mode locally using host PC mutiple cores and threads, will consume more memory. 
-
-
-
-1. Clone the repo into the local host PC:
+1. Download the repo into the local host PC:
 
 ```bash
 
-    git clone https://github.com/Computational-Plant-Science/AI_U2net_color_clustering.git
+    git clone https://github.com/Computational-Plant-Science/SMART.git
 
 ```
 
-   Now you should have a clone of the pipeline source code in your local PC, the folder path was:
+   Now you should have a clone of the SMART pipeline source code in your local PC, the folder path was:
 ```
-   /$host_path/AI_U2net_color_clustering/
+   /$host_path/SMART/
    
     Note: $host_path can be any path chosen by the user. 
 ```
@@ -95,24 +91,29 @@ Note: pl can be set to 1 to use parallel processing mode locally using host PC m
 
    here we use the sample images inside the repo as input, the path was:
 ```
-   /$host_path/AI_U2net_color_clustering/sample_test/
+   /$host_path/SMART/sample_test/
 ```
 
-3. Main pipeline to compute the segmentation results:
+2. extract traits:
 
 ```bash
 
-   cd /$host_path/AI_U2net_color_clustering/
+   cd /$host_path/SMART/
 
-   
-   python3 /$host_path/AI_U2net_color_clustering/ai_color_cluster_seg.py -p /$host_path/AI_U2net_color_clustering/sample_test/ -ft CR2 -o /$host_path/AI_U2net_color_clustering/sample_test/
+   python3 /opt/smart/core/trait_extract_parallel_demo.py -p /$host_path/SMART/sample_test/ `
 
 ```
-Results will be generated in the output folder by adding "/$host_path/AI_U2net_color_clustering/sample_test/"
+Results will be generated in the same input folder, however, the user can specify the output folder by adding "-r /path/to/output/folder"
 
-The default input image type png, can be changed by adding a parameter such as " -ft CR2".
+The default input image type jpg, can be changed by adding a parameter such as " -ft png".
 
+E.g. 
 
+```bash
+
+   python3 /opt/smart/core/trait_extract_parallel_demo.py -p /$host_path/$inout_image_folder/ -ft png -r /$path_to_output_folder/`
+
+```
 
 
 ## Usage for Docker container 
@@ -124,9 +125,9 @@ The default input image type png, can be changed by adding a parameter such as "
 
 ```bash
 
-    docker pull computationalplantscience/AI_U2net_color_clustering
+    docker pull computationalplantscience/smart
 
-    docker run -v /$path_to_test_image:/images -it computationalplantscience/AI_U2net_color_clustering
+    docker run -v /$path_to_test_image:/images -it computationalplantscience/smart
 
 Note: The "/" at the end of the path was NOT needed when mounting a host directory into a Docker container. Above command mount the local directory "/$path_to_test_image" inside the container path "/images"
 Reference: https://docs.docker.com/storage/bind-mounts/
@@ -134,55 +135,33 @@ Reference: https://docs.docker.com/storage/bind-mounts/
 
 For example, to run the sample test inside this repo, under the folder "sample_test", first locate the local path 
 ```
-    docker run -v /$path_to_test_image:/images -it computationalplantscience/AI_U2net_color_clustering
+    docker run -v /$path_to_SMART_repo/SMART/sample_test:/images -it computationalplantscience/smart
 ```
 
     then run the mounted input images inside the container:
 ``` 
-    python3 /opt/code/ai_color_cluster_seg.py -p /images/ -ft CR2 
+    python3 /opt/smart/core/trait_extract_parallel_demo.py -p /images/ -ft jpg
 ```
     or 
 ```
-    docker run -v /$path_to_test_images:/images -it computationalplantscience/AI_U2net_color_clustering  python3 /opt/code/ai_color_cluster_seg.py -p /images/ -ft CR2 
+    docker run -v /$path_to_SMART_repo/SMART/sample_test:/images -it computationalplantscience/smart  python3 /opt/smart/core/trait_extract_parallel_demo.py -p /images/ -ft jpg
 ```
 
 2. Build your local container
 
 ```bash
 
-    docker build -t test_container -f Dockerfile .
+    docker build -t smart_container -f Dockerfile .
 
-    docker run -v  /$path_to_test_images:/images -it test_container
+    docker run -v  /home/suxing/SMART/sample_test:/images -it smart_container
 
 ```
 
-3. Addition function to change the image format from 
+Results will be generated in the same input folder, trait.xlsx and trait.csv, which contains trait computation results.
 
-```bash
+The other folder with the same name of input images contains all related image results for visualization purposes. 
 
-    docker build -t test_container -f Dockerfile .
-
-    docker run -v  /$path_to_test_images:/images -it test_container 
-    
-    python3 image_converter.py -p /images/ -ft CR2  -o /images/
-    
-    note: "-o /images/" was output path, user can create a new folder such as "/$path_to_test_images/png/" then change output path to "-o /images/png/"
-        
-    or docker run -v  /$path_to_test_images:/images -it computationalplantscience/AI_U2net_color_clustering python3 image_converter.py -p /images/ -ft CR2  -o /images/
-
-``` 
-
-
-
-Results will be generated in the same input folder.
-
-Note: They are processed copies of the original images, all the image content information was processed and extracted as traits information. 
-
-
-
-
-
-
+They are processed copies of the original images, all the image content information was processed and extracted as traits information. 
 
 
 ## Collaboration
@@ -193,7 +172,7 @@ The SMART pipeline has been integrated into CyVerse cloud computing-based websit
 CyVerse users can upload data and run the SMART pipeline for free. 
 
 
-The SMART pipeline has also been applied in collaboration with the following research institutes and companies: 
+The SMART pipeline has also been applied in collaboration with following research institutes and companies: 
 
 1. Dr. David G. Mendoza-Cozatl at [University of Missouri](https://cafnr.missouri.edu/person/david-mendoza-cozatl/)
 
@@ -214,6 +193,7 @@ The SMART pipeline has also been applied in collaboration with the following res
 ## Imaging protocol for SMART
 
 
+![Optional Text](../main/media/plant.jpg)
 
 Setting up plants
 
@@ -225,7 +205,7 @@ Setting up plants
 
 
 
-
+![Optional Text](../main/media/camera.jpg)
 
 Setting up camera
 
@@ -242,26 +222,5 @@ Setting up the lighting environment
     2. Reduce shadow as much as possible.
     3. Keep the illumination environment constant between imaging different plants. 
     4. Avoid overexposure and reflection effects.
-
-
-Reference:
-
-    https://arxiv.org/pdf/2005.09007.pdf
-    https://github.com/NathanUA/U-2-Net
-    https://github.com/pymatting/pymatting
-    https://github.com/danielgatis/rembg
-    
-
-## Citation
-```
-@InProceedings{Qin_2020_PR,
-title = {U2-Net: Going Deeper with Nested U-Structure for Salient Object Detection},
-author = {Qin, Xuebin and Zhang, Zichen and Huang, Chenyang and Dehghan, Masood and Zaiane, Osmar and Jagersand, Martin},
-journal = {Pattern Recognition},
-volume = {106},
-pages = {107404},
-year = {2020}
-}
-```
 
 

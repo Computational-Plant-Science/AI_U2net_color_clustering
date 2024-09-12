@@ -1,15 +1,16 @@
+#name: "ml_smart_docker"
 name: "ai_u2net_color_clustering"
 author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/ai_u2net_color_clustering
-commands: /opt/smart/plantit_pipeline.sh
+commands: /opt/code/ml_smart_pipeline.sh
 
 input:
   kind: directory
   path:
   filetypes:
-    - CR2
+    - jpg
     - png
     
 output:
@@ -17,8 +18,9 @@ output:
   include:
     patterns:
       - png
+      - xlsx
       
-logo: media/rosette.jpg
+
 
 jobqueue:
   walltime: "01:00:00"

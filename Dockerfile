@@ -3,16 +3,16 @@
 #Summary: Docker recipe file for smart pipeline
 #Author: suxing liu
 #Author-email: suxingliu@gmail.com
-#Created: 2022-10-29
+#Created: 2024-10-29
 
 #USAGE:
-#docker build -t plant_test -f Dockerfile .
-#docker run -v /path to test image:/images -it plant_test
-#cd /opt/code/
-#python3 /opt/code/python3 ai_color_cluster_seg.py -p ~/example/ -ft png
+#docker build -t test_docker -f Dockerfile .
+#docker run -v /input:/images -it test_docker
+#cd /opt/smart/
+#python3 /opt/code/ml_smart.py -p /input/ 
 
 
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 
 LABEL maintainer='Suxing Liu, Wes Bonelli'
 
@@ -46,12 +46,16 @@ RUN pip3 install numpy \
     openpyxl \
     imutils \
     numba \
+    skan \
+    tabulate \
     pylibdmtx \
     psutil \
     natsort \
     pathlib \
     kmeans1d \
     rembg
+
+
 
 
 RUN chmod -R a+rwx /opt/code/
