@@ -4,7 +4,7 @@ author: Suxing Liu
 public: True
 clone: True
 image: docker://computationalplantscience/ai_u2net_color_clustering
-commands: /opt/code/ml_smart_pipeline.sh
+commands: /opt/code/plantit_pipeline.sh
 
 input:
   kind: directory
